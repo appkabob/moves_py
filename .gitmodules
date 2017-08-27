@@ -1,0 +1,3 @@
+[submodule "lib/PyMoves"]
+	path = lib/PyMoves
+	url = https://github.com/appkabob/PyMoves.git
