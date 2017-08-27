@@ -1,4 +1,5 @@
 import folium
+from folium import plugins
 from lib.PyMoves.moves import Moves
 import constants
 
@@ -18,10 +19,26 @@ class Map:
                         trackpoints.append(tuple([trackpoint['lat'], trackpoint['lon']]))
         return trackpoints
 
-    def save(self, filename, polyline_data):
+    def save(self, filename, data_layers):
+        """data_layers should be a dict of format {name: 'Airplane', color: 'blue', trackpoints: [[lat, lon]]}"""
         map = folium.Map(location=[38.58, -99.09], zoom_start=3, tiles="Mapbox Bright")
-        fgp = folium.FeatureGroup(name="Paths")
-        fgp.add_child(folium.PolyLine(polyline_data, color="blue", weight=2.5, opacity=0.5))
-        map.add_child(fgp)
+        for layer in data_layers:
+            fgp = folium.FeatureGroup(name=layer['name'])
+
+            if layer['name'] == 'Airplane':
+                attr = {'font-weight': 'bold', 'font-size': '20', 'opacity': 0.5}
+                plane_line = folium.PolyLine(layer['trackpoints'], color=layer['color'], weight=1, opacity=0.5)
+                plane_line1 = plugins.PolyLineTextPath(
+                    plane_line,
+                    '\u2708                 ',
+                    repeat=True,
+                    offset=8,
+                    attributes=attr
+                )
+                fgp.add_child(plane_line)
+                fgp.add_child(plane_line1)
+            else:
+                fgp.add_child(folium.PolyLine(layer['trackpoints'], color=layer['color'], weight=2.5, opacity=0.5))
+            map.add_child(fgp)
         map.add_child(folium.LayerControl())
         map.save(filename)
